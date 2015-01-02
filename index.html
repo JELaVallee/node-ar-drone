@@ -1,0 +1,501 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Node-ar-drone by faizalpribadi</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+  </head>
+  <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/faizalpribadi/node-ar-drone">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/faizalpribadi/node-ar-drone/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/faizalpribadi/node-ar-drone/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
+          <h1>Node-ar-drone</h1>
+          <p>A node.js client for controlling Parrot AR Drone 2.0 quad-copters.</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/faizalpribadi">faizalpribadi</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
+        <h1>
+<a id="ar-drone" class="anchor" href="#ar-drone" aria-hidden="true"><span class="octicon octicon-link"></span></a>ar-drone</h1>
+
+<p><a href="http://travis-ci.org/felixge/node-ar-drone"><img src="https://secure.travis-ci.org/felixge/node-ar-drone.png" alt="Build Status"></a></p>
+
+<p>An implementation of the networking protocols used by the
+<a href="http://ardrone2.parrot.com/">Parrot AR Drone 2.0</a>. It appears that 1.0 drones are also <a href="https://github.com/felixge/node-ar-drone/issues/11#issuecomment-9402270">compatible</a>.</p>
+
+<p>Install via Github to get the <em>latest</em> version:</p>
+
+<div class="highlight highlight-bash"><pre>npm install git://github.com/felixge/node-ar-drone.git</pre></div>
+
+<p>Or, if you're fine with missing some cutting edge stuff, go for npm:</p>
+
+<div class="highlight highlight-bash"><pre>npm install ar-drone</pre></div>
+
+<h2>
+<a id="introduction" class="anchor" href="#introduction" aria-hidden="true"><span class="octicon octicon-link"></span></a>Introduction</h2>
+
+<p>The AR Drone is an affordable, yet surprisingly capable quadcopter. The drone
+itself runs a proprietary firmware that can be controlled via WiFi using the official
+FreeFlight mobile app
+(available for <a href="http://itunes.apple.com/us/app/freeflight/id373065271?mt=8">iOS</a> and <a href="https://play.google.com/store/apps/details?id=com.parrot.freeflight&amp;hl=en">Android</a>).</p>
+
+<p>Unlike the firmware, the client protocol is open, and Parrot publishes an <a href="https://projects.ardrone.org/projects/show/ardrone-api">SDK</a>
+(signup required to download) including a good amount of documentation and C
+code. Their target audience seems to be mobile developers who can use this
+SDK to create games and other apps for people to have more fun with their drones.</p>
+
+<p>However, the protocol can also be used to receive video and sensor data, enabling
+developers to write autonomous programs for the upcoming robot revolution.</p>
+
+<h2>
+<a id="status" class="anchor" href="#status" aria-hidden="true"><span class="octicon octicon-link"></span></a>Status</h2>
+
+<p>This module is still under <a href="CONTRIBUTING.md">heavy development</a>, so please don't be surprised if
+you find some functionality missing or undocumented.</p>
+
+<p>However, the documented parts are tested and should work well for most parts.</p>
+
+<h2>
+<a id="client" class="anchor" href="#client" aria-hidden="true"><span class="octicon octicon-link"></span></a>Client</h2>
+
+<p>This module exposes a high level Client API that tries to support all drone
+features, while making them easy to use.</p>
+
+<p>The best way to get started is to create a <code>repl.js</code> file like this:</p>
+
+<div class="highlight highlight-js"><pre><span class="pl-s">var</span> arDrone <span class="pl-k">=</span> <span class="pl-s3">require</span>(<span class="pl-s1"><span class="pl-pds">'</span>ar-drone<span class="pl-pds">'</span></span>);
+<span class="pl-s">var</span> client  <span class="pl-k">=</span> arDrone.createClient();
+client.createRepl();</pre></div>
+
+<p>Using this REPL, you should be able to have some fun:</p>
+
+<div class="highlight highlight-js"><pre>$ node repl.js
+<span class="pl-c">// Make the drone takeoff</span>
+drone<span class="pl-k">&gt;</span> takeoff()
+<span class="pl-c1">true</span>
+<span class="pl-c">// Wait for the drone to takeoff</span>
+drone<span class="pl-k">&gt;</span> clockwise(<span class="pl-c1">0.5</span>)
+<span class="pl-c1">0.5</span>
+<span class="pl-c">// Let the drone spin for a while</span>
+drone<span class="pl-k">&gt;</span> land()
+<span class="pl-c1">true</span>
+<span class="pl-c">// Wait for the drone to land</span></pre></div>
+
+<p>Now you could write an autonomous program that does the same:</p>
+
+<div class="highlight highlight-js"><pre><span class="pl-s">var</span> arDrone <span class="pl-k">=</span> <span class="pl-s3">require</span>(<span class="pl-s1"><span class="pl-pds">'</span>ar-drone<span class="pl-pds">'</span></span>);
+<span class="pl-s">var</span> client  <span class="pl-k">=</span> arDrone.createClient();
+
+client.takeoff();
+
+client
+  .after(<span class="pl-c1">5000</span>, <span class="pl-st">function</span>() {
+    <span class="pl-v">this</span>.clockwise(<span class="pl-c1">0.5</span>);
+  })
+  .after(<span class="pl-c1">3000</span>, <span class="pl-st">function</span>() {
+    <span class="pl-v">this</span>.<span class="pl-s3">stop</span>();
+    <span class="pl-v">this</span>.land();
+  });</pre></div>
+
+<p>Ok, but what if you want to make your drone to interact with something? Well,
+you could start by looking at the sensor data:</p>
+
+<div class="highlight highlight-js"><pre>client.on(<span class="pl-s1"><span class="pl-pds">'</span>navdata<span class="pl-pds">'</span></span>, <span class="pl-en">console</span><span class="pl-s3">.log</span>);</pre></div>
+
+<p>Not all of this is handled by the Client library yet, but you should at the
+very least be able to receive <code>droneState</code> and <code>demo</code> data.</p>
+
+<p>A good initial challenge might be to try flying to a certain altitude based
+on the <code>navdata.demo.altitudeMeters</code> property.</p>
+
+<p>Once you have managed this, you may want to try looking at the camera image. Here
+is a simple way to get this as PngBuffers (requires a recent ffmpeg version to
+be found in your <code>$PATH</code>):</p>
+
+<div class="highlight highlight-js"><pre><span class="pl-s">var</span> pngStream <span class="pl-k">=</span> client.getPngStream();
+pngStream.on(<span class="pl-s1"><span class="pl-pds">'</span>data<span class="pl-pds">'</span></span>, <span class="pl-en">console</span><span class="pl-s3">.log</span>);</pre></div>
+
+<p>Your first challenge might be to expose these png images as a node http web
+server. Once you have done that, you should try feeding them into the
+<a href="https://npmjs.org/package/opencv">opencv</a> module.</p>
+
+<h3>
+<a id="client-api" class="anchor" href="#client-api" aria-hidden="true"><span class="octicon octicon-link"></span></a>Client API</h3>
+
+<h4>
+<a id="ardronecreateclientoptions" class="anchor" href="#ardronecreateclientoptions" aria-hidden="true"><span class="octicon octicon-link"></span></a>arDrone.createClient([options])</h4>
+
+<p>Returns a new <code>Client</code> object. <code>options</code> include:</p>
+
+<ul>
+<li>
+<code>ip</code>: The IP of the drone. Defaults to <code>'192.168.1.1'</code>.</li>
+<li>
+<code>frameRate</code>: The frame rate of the PngEncoder. Defaults to <code>5</code>.</li>
+<li>
+<code>imageSize</code>: The image size produced by PngEncoder. Defaults to <code>null</code>.</li>
+</ul>
+
+<h4>
+<a id="clientcreaterepl" class="anchor" href="#clientcreaterepl" aria-hidden="true"><span class="octicon octicon-link"></span></a>client.createREPL()</h4>
+
+<p>Launches an interactive interface with all client methods available in the
+active scope. Additionally <code>client</code> resolves to the <code>client</code> instance itself.</p>
+
+<h4>
+<a id="clientgetpngstream" class="anchor" href="#clientgetpngstream" aria-hidden="true"><span class="octicon octicon-link"></span></a>client.getPngStream()</h4>
+
+<p>Returns a <code>PngEncoder</code> object that emits individual png image buffers as <code>'data'</code>
+events. Multiple calls to this method returns the same object. Connection lifecycle
+(e.g. reconnect on error) is managed by the client.</p>
+
+<h4>
+<a id="clientgetvideostream" class="anchor" href="#clientgetvideostream" aria-hidden="true"><span class="octicon octicon-link"></span></a>client.getVideoStream()</h4>
+
+<p>Returns a <code>TcpVideoStream</code> object that emits raw tcp packets as <code>'data'</code>
+events. Multiple calls to this method returns the same object. Connection lifecycle
+(e.g. reconnect on error) is managed by the client.</p>
+
+<h4>
+<a id="clienttakeoffcallback" class="anchor" href="#clienttakeoffcallback" aria-hidden="true"><span class="octicon octicon-link"></span></a>client.takeoff(callback)</h4>
+
+<p>Sets the internal <code>fly</code> state to <code>true</code>, <code>callback</code> is invoked after the drone
+reports that it is hovering.</p>
+
+<h4>
+<a id="clientlandcallback" class="anchor" href="#clientlandcallback" aria-hidden="true"><span class="octicon octicon-link"></span></a>client.land(callback)</h4>
+
+<p>Sets the internal <code>fly</code> state to <code>false</code>, <code>callback</code> is invoked after the drone
+reports it has landed.</p>
+
+<h4>
+<a id="clientupspeed--clientdownspeed" class="anchor" href="#clientupspeed--clientdownspeed" aria-hidden="true"><span class="octicon octicon-link"></span></a>client.up(speed) / client.down(speed)</h4>
+
+<p>Makes the drone gain or reduce altitude. <code>speed</code> can be a value from <code>0</code> to <code>1</code>.</p>
+
+<h4>
+<a id="clientclockwisespeed--clientcounterclockwisespeed" class="anchor" href="#clientclockwisespeed--clientcounterclockwisespeed" aria-hidden="true"><span class="octicon octicon-link"></span></a>client.clockwise(speed) / client.counterClockwise(speed)</h4>
+
+<p>Causes the drone to spin. <code>speed</code> can be a value from <code>0</code> to <code>1</code>.</p>
+
+<h4>
+<a id="clientfrontspeed--clientbackspeed" class="anchor" href="#clientfrontspeed--clientbackspeed" aria-hidden="true"><span class="octicon octicon-link"></span></a>client.front(speed) / client.back(speed)</h4>
+
+<p>Controls the pitch, which a horizontal movement using the camera
+as a reference point.  <code>speed</code> can be a value from <code>0</code> to <code>1</code>.</p>
+
+<h4>
+<a id="clientleftspeed--clientrightspeed" class="anchor" href="#clientleftspeed--clientrightspeed" aria-hidden="true"><span class="octicon octicon-link"></span></a>client.left(speed) / client.right(speed)</h4>
+
+<p>Controls the roll, which is a horizontal movement using the camera
+as a reference point.  <code>speed</code> can be a value from <code>0</code> to <code>1</code>.</p>
+
+<h4>
+<a id="clientstop" class="anchor" href="#clientstop" aria-hidden="true"><span class="octicon octicon-link"></span></a>client.stop()</h4>
+
+<p>Sets all drone movement commands to <code>0</code>, making it effectively hover in place.</p>
+
+<h4>
+<a id="clientcalibratedevice_num" class="anchor" href="#clientcalibratedevice_num" aria-hidden="true"><span class="octicon octicon-link"></span></a>client.calibrate(device_num)</h4>
+
+<p>Asks the drone to calibrate a device.  Currently the AR.Drone firmware
+supports only one device that can be calibrated: the magnetometer,
+which is device number 0.</p>
+
+<p>The magnetometer can only be calibrated while the drone is flying, and
+the calibration routine causes the drone to yaw in place a full 360
+degrees.</p>
+
+<h4>
+<a id="clientconfigkey-value-callback" class="anchor" href="#clientconfigkey-value-callback" aria-hidden="true"><span class="octicon octicon-link"></span></a>client.config(key, value, callback)</h4>
+
+<p>Sends a config command to the drone. You will need to download the drone
+<a href="https://projects.ardrone.org/projects/show/ardrone-api">SDK</a> to find a full list of commands in the <code>ARDrone_Developer_Guide.pdf</code>.</p>
+
+<p>For example, this command can be used to instruct the drone to send all navdata.</p>
+
+<div class="highlight highlight-js"><pre>client.config(<span class="pl-s1"><span class="pl-pds">'</span>general:navdata_demo<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>FALSE<span class="pl-pds">'</span></span>);</pre></div>
+
+<p><code>callback</code> is invoked after the drone acknowledges the config request
+or if a timeout occurs.</p>
+
+<p>Alternatively, you can pass an options object containing the following:</p>
+
+<ul>
+<li>
+<code>key</code>: The config key to set.</li>
+<li>
+<code>value</code>: The config value to set.</li>
+<li>
+<code>timeout</code>: The time, in milliseconds, to wait for an ACK from the drone.</li>
+</ul>
+
+<p>For example:</p>
+
+<pre><code>var callback = function(err) { if (err) console.log(err); };
+client.config({ key: 'general:navdata_demo', value: 'FALSE', timeout: 1000 }, callback);
+</code></pre>
+
+<h4>
+<a id="clientanimateanimation-duration" class="anchor" href="#clientanimateanimation-duration" aria-hidden="true"><span class="octicon octicon-link"></span></a>client.animate(animation, duration)</h4>
+
+<p>Performs a pre-programmed flight sequence for a given <code>duration</code> (in ms).
+<code>animation</code> can be one of the following:</p>
+
+<div class="highlight highlight-js"><pre>[<span class="pl-s1"><span class="pl-pds">'</span>phiM30Deg<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>phi30Deg<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>thetaM30Deg<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>theta30Deg<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>theta20degYaw200deg<span class="pl-pds">'</span></span>,
+<span class="pl-s1"><span class="pl-pds">'</span>theta20degYawM200deg<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>turnaround<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>turnaroundGodown<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>yawShake<span class="pl-pds">'</span></span>,
+<span class="pl-s1"><span class="pl-pds">'</span>yawDance<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>phiDance<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>thetaDance<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>vzDance<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>wave<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>phiThetaMixed<span class="pl-pds">'</span></span>,
+<span class="pl-s1"><span class="pl-pds">'</span>doublePhiThetaMixed<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>flipAhead<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>flipBehind<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>flipLeft<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>flipRight<span class="pl-pds">'</span></span>]</pre></div>
+
+<p>Example:</p>
+
+<div class="highlight highlight-js"><pre>client.animate(<span class="pl-s1"><span class="pl-pds">'</span>flipLeft<span class="pl-pds">'</span></span>, <span class="pl-c1">1000</span>);</pre></div>
+
+<p>Please note that the drone will need a good amount of altitude and headroom
+to perform a flip. So be careful!</p>
+
+<h4>
+<a id="clientanimateledsanimation-hz-duration" class="anchor" href="#clientanimateledsanimation-hz-duration" aria-hidden="true"><span class="octicon octicon-link"></span></a>client.animateLeds(animation, hz, duration)</h4>
+
+<p>Performs a pre-programmed led sequence at given <code>hz</code> frequency and <code>duration</code>
+(in sec!). <code>animation</code> can be one of the following:</p>
+
+<div class="highlight highlight-js"><pre>[<span class="pl-s1"><span class="pl-pds">'</span>blinkGreenRed<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>blinkGreen<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>blinkRed<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>blinkOrange<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>snakeGreenRed<span class="pl-pds">'</span></span>,
+<span class="pl-s1"><span class="pl-pds">'</span>fire<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>standard<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>red<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>green<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>redSnake<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>blank<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>rightMissile<span class="pl-pds">'</span></span>,
+<span class="pl-s1"><span class="pl-pds">'</span>leftMissile<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>doubleMissile<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>frontLeftGreenOthersRed<span class="pl-pds">'</span></span>,
+<span class="pl-s1"><span class="pl-pds">'</span>frontRightGreenOthersRed<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>rearRightGreenOthersRed<span class="pl-pds">'</span></span>,
+<span class="pl-s1"><span class="pl-pds">'</span>rearLeftGreenOthersRed<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>leftGreenRightRed<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>leftRedRightGreen<span class="pl-pds">'</span></span>,
+<span class="pl-s1"><span class="pl-pds">'</span>blinkStandard<span class="pl-pds">'</span></span>]</pre></div>
+
+<p>Example:</p>
+
+<div class="highlight highlight-js"><pre>client.animateLeds(<span class="pl-s1"><span class="pl-pds">'</span>blinkRed<span class="pl-pds">'</span></span>, <span class="pl-c1">5</span>, <span class="pl-c1">2</span>)</pre></div>
+
+<h4>
+<a id="clientdisableemergency" class="anchor" href="#clientdisableemergency" aria-hidden="true"><span class="octicon octicon-link"></span></a>client.disableEmergency()</h4>
+
+<p>Causes the emergency REF bit to be set to 1 until
+<code>navdata.droneState.emergencyLanding</code> is 0. This recovers a drone that has
+flipped over and is showing red lights to be flyable again and show green
+lights.  It is also done implicitly when creating a new high level client.</p>
+
+<h4>
+<a id="events" class="anchor" href="#events" aria-hidden="true"><span class="octicon octicon-link"></span></a>Events</h4>
+
+<p>A client will emit landed, hovering, flying, landing, batteryChange, and altitudeChange events as long as demo navdata is enabled.</p>
+
+<p>To enable demo navdata use</p>
+
+<div class="highlight highlight-js"><pre>client.config(<span class="pl-s1"><span class="pl-pds">'</span>general:navdata_demo<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>FALSE<span class="pl-pds">'</span></span>);</pre></div>
+
+<h2>
+<a id="udpcontrol" class="anchor" href="#udpcontrol" aria-hidden="true"><span class="octicon octicon-link"></span></a>UdpControl</h2>
+
+<p>This is a low level API. If you prefer something simpler, check out the Client
+docs.</p>
+
+<p>The drone is controlled by sending UDP packets on port 5556. Because UDP
+does not guarantee message ordering or delivery, clients must repeatedly send
+their instructions and include an incrementing sequence number with each
+command.</p>
+
+<p>For example, the command used for takeoff/landing (REF), with a sequence number
+of 1, and a parameter of 512 (takeoff) looks like this:</p>
+
+<pre><code>AT*REF=1,512\r
+</code></pre>
+
+<p>To ease the creation and sending of these packets, this module exposes an
+<code>UdpControl</code> class handling this task. For example, the following program will
+cause your drone to takeoff and hover in place.</p>
+
+<div class="highlight highlight-js"><pre><span class="pl-s">var</span> arDrone <span class="pl-k">=</span> <span class="pl-s3">require</span>(<span class="pl-s1"><span class="pl-pds">'</span>ar-drone<span class="pl-pds">'</span></span>);
+<span class="pl-s">var</span> control <span class="pl-k">=</span> arDrone.createUdpControl();
+
+<span class="pl-s3">setInterval</span>(<span class="pl-st">function</span>() {
+  <span class="pl-c">// The emergency: true option recovers your drone from emergency mode that can</span>
+  <span class="pl-c">// be caused by flipping it upside down or the drone crashing into something.</span>
+  <span class="pl-c">// In a real program you probably only want to send emergency: true for one</span>
+  <span class="pl-c">// second in the beginning, otherwise your drone may attempt to takeoff again</span>
+  <span class="pl-c">// after a crash.</span>
+  control.ref({fly<span class="pl-k">:</span> <span class="pl-c1">true</span>, emergency<span class="pl-k">:</span> <span class="pl-c1">true</span>});
+  <span class="pl-c">// This command makes sure your drone hovers in place and does not drift.</span>
+  control.pcmd();
+  <span class="pl-c">// This causes the actual udp message to be send (multiple commands are</span>
+  <span class="pl-c">// combined into one message)</span>
+  control.flush();
+}, <span class="pl-c1">30</span>);</pre></div>
+
+<p>Now that you are airborne, you can fly around by passing an argument to the
+<code>pcmd()</code> method:</p>
+
+<div class="highlight highlight-js"><pre>control.pcmd({
+  front<span class="pl-k">:</span> <span class="pl-c1">0.5</span>, <span class="pl-c">// fly forward with 50% speed</span>
+  up<span class="pl-k">:</span> <span class="pl-c1">0.3</span>, <span class="pl-c">// and also fly up with 30% speed</span>
+});</pre></div>
+
+<p>That's it! A full list of all <code>pcmd()</code> options can be found in the API docs
+below.</p>
+
+<p>With what you have learned so far, you could create a simple program
+like this:</p>
+
+<div class="highlight highlight-js"><pre><span class="pl-s">var</span> arDrone <span class="pl-k">=</span> <span class="pl-s3">require</span>(<span class="pl-s1"><span class="pl-pds">'</span>ar-drone<span class="pl-pds">'</span></span>);
+<span class="pl-s">var</span> control <span class="pl-k">=</span> arDrone.createUdpControl();
+<span class="pl-s">var</span> start   <span class="pl-k">=</span> <span class="pl-s3">Date</span>.now();
+
+<span class="pl-s">var</span> ref  <span class="pl-k">=</span> {};
+<span class="pl-s">var</span> pcmd <span class="pl-k">=</span> {};
+
+<span class="pl-en">console</span><span class="pl-s3">.log</span>(<span class="pl-s1"><span class="pl-pds">'</span>Recovering from emergency mode if there was one ...<span class="pl-pds">'</span></span>);
+ref.emergency <span class="pl-k">=</span> <span class="pl-c1">true</span>;
+<span class="pl-s3">setTimeout</span>(<span class="pl-st">function</span>() {
+  <span class="pl-en">console</span><span class="pl-s3">.log</span>(<span class="pl-s1"><span class="pl-pds">'</span>Takeoff ...<span class="pl-pds">'</span></span>);
+
+  ref.emergency <span class="pl-k">=</span> <span class="pl-c1">false</span>;
+  ref.fly       <span class="pl-k">=</span> <span class="pl-c1">true</span>;
+
+}, <span class="pl-c1">1000</span>);
+
+<span class="pl-s3">setTimeout</span>(<span class="pl-st">function</span>() {
+  <span class="pl-en">console</span><span class="pl-s3">.log</span>(<span class="pl-s1"><span class="pl-pds">'</span>Turning clockwise ...<span class="pl-pds">'</span></span>);
+
+  pcmd.clockwise <span class="pl-k">=</span> <span class="pl-c1">0.5</span>;
+}, <span class="pl-c1">6000</span>);
+
+<span class="pl-s3">setTimeout</span>(<span class="pl-st">function</span>() {
+  <span class="pl-en">console</span><span class="pl-s3">.log</span>(<span class="pl-s1"><span class="pl-pds">'</span>Landing ...<span class="pl-pds">'</span></span>);
+
+  ref.fly <span class="pl-k">=</span> <span class="pl-c1">false</span>;
+  pcmd <span class="pl-k">=</span> {};
+}, <span class="pl-c1">8000</span>);
+
+
+<span class="pl-s3">setInterval</span>(<span class="pl-st">function</span>() {
+  control.ref(ref);
+  control.pcmd(pcmd);
+  control.flush();
+}, <span class="pl-c1">30</span>);</pre></div>
+
+<h3>
+<a id="udpcontrol-api" class="anchor" href="#udpcontrol-api" aria-hidden="true"><span class="octicon octicon-link"></span></a>UdpControl API</h3>
+
+<h4>
+<a id="ardronecreateudpcontroloptions--new-ardroneudpcontroloptions" class="anchor" href="#ardronecreateudpcontroloptions--new-ardroneudpcontroloptions" aria-hidden="true"><span class="octicon octicon-link"></span></a>arDrone.createUdpControl([options]) / new arDrone.UdpControl([options])</h4>
+
+<p>Creates a new UdpControl instance where <code>options</code> can include:</p>
+
+<ul>
+<li>
+<code>ip</code>: The drone IP address, defaults to <code>'192.168.1.1'</code>.</li>
+<li>
+<code>port</code>: The port to use, defaults to <code>5556</code>.</li>
+</ul>
+
+<h4>
+<a id="udpcontrolrawcommand-arg1-arg2-" class="anchor" href="#udpcontrolrawcommand-arg1-arg2-" aria-hidden="true"><span class="octicon octicon-link"></span></a>udpControl.raw(command, [arg1, arg2, ...])</h4>
+
+<p>Enqueues a raw <code>AT*</code> command. This is useful if you want full control.</p>
+
+<p>For example, a takeoff instructions be send like this:</p>
+
+<div class="highlight highlight-js"><pre>udpControl.raw(<span class="pl-s1"><span class="pl-pds">'</span>REF<span class="pl-pds">'</span></span>, (<span class="pl-c1">1</span> <span class="pl-k">&lt;&lt;</span> <span class="pl-c1">9</span>));</pre></div>
+
+<h4>
+<a id="udpcontrolrefoptions" class="anchor" href="#udpcontrolrefoptions" aria-hidden="true"><span class="octicon octicon-link"></span></a>udpControl.ref([options])</h4>
+
+<p>Enqueues a <code>AT*REF</code> command, options are:</p>
+
+<ul>
+<li>
+<code>fly</code>: Set this to <code>true</code> for takeoff / staying in air, or <code>false</code> to initiate
+landing / stay on the ground. Defaults to <code>false</code>.</li>
+<li>
+<code>emergency</code>: Set this to <code>true</code> to set the emergency bit, or <code>false</code> to not
+set it. Details on this can be found in the official SDK Guide. Defaults to
+<code>false</code>.</li>
+</ul>
+
+<h4>
+<a id="udpcontrolpcmdoptions" class="anchor" href="#udpcontrolpcmdoptions" aria-hidden="true"><span class="octicon octicon-link"></span></a>udpControl.pcmd([options])</h4>
+
+<p>Enqueues a <code>AT*PCMD</code> (progressive) command, options are:</p>
+
+<ul>
+<li>
+<code>front</code> or <code>back</code>: Fly towards or away from front camera direction.</li>
+<li>
+<code>left</code> or/ <code>right</code>: Fly towards the left or right of the front camera.</li>
+<li>
+<code>up</code> or <code>down</code>: Gain or reduce altitude.</li>
+<li>
+<code>clockwise</code> or <code>counterClockwise</code>: Rotate around the center axis.</li>
+</ul>
+
+<p>The values for each option are the speed to use for the operation and can range
+from 0 to 1. You can also use negative values like <code>{front: -0.5}</code>, which is
+the same as <code>{back: 0.5}</code>.</p>
+
+<h4>
+<a id="udpcontrolflush" class="anchor" href="#udpcontrolflush" aria-hidden="true"><span class="octicon octicon-link"></span></a>udpControl.flush()</h4>
+
+<p>Sends all enqueued commands as an UDP packet to the drone.</p>
+
+<h2>
+<a id="video" class="anchor" href="#video" aria-hidden="true"><span class="octicon octicon-link"></span></a>Video</h2>
+
+<p><a href="https://github.com/TODO" class="user-mention">@TODO</a> Document the low level video API.</p>
+
+<h2>
+<a id="navdata" class="anchor" href="#navdata" aria-hidden="true"><span class="octicon octicon-link"></span></a>Navdata</h2>
+
+<p><a href="https://github.com/TODO" class="user-mention">@TODO</a> Document the low level navdata API.</p>
+
+<h2>
+<a id="environment-variables" class="anchor" href="#environment-variables" aria-hidden="true"><span class="octicon octicon-link"></span></a>Environment variables</h2>
+
+<ul>
+<li>DEFAULT_DRONE_IP</li>
+</ul>
+
+<h2>
+<a id="camera-access" class="anchor" href="#camera-access" aria-hidden="true"><span class="octicon octicon-link"></span></a>Camera access</h2>
+
+<p>You can access the head camera and the bottom camera, you just have to change
+the config:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-c">// access the head camera</span>
+client.config(<span class="pl-s1"><span class="pl-pds">'</span>video:video_channel<span class="pl-pds">'</span></span>, <span class="pl-c1">0</span>);
+
+<span class="pl-c">// access the bottom camera</span>
+client.config(<span class="pl-s1"><span class="pl-pds">'</span>video:video_channel<span class="pl-pds">'</span></span>, <span class="pl-c1">3</span>);</pre></div>
+      </section>
+
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
